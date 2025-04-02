@@ -266,11 +266,7 @@ class PhilipsAirPurifierFan(FanEntity):
         """Set a preset mode on the fan."""
 
         if preset_mode in MODE_MAP.values():
-            philips_mode = self._find_key(MODE_MAP, preset_mode)
-            if philips_mode == "S":
-                await self._async_set_values({PHILIPS_MODE: "M", PHILIPS_SPEED: "s"})
-            else:
-                await self._async_set_values({PHILIPS_MODE: philips_mode})
+            await self._async_set_values({PHILIPS_MODE: philips_mode})
         else:
             _LOGGER.warning('Unsupported preset mode "%s"', preset_mode)
 
