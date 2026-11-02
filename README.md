@@ -9,6 +9,9 @@ This is a fork of [GeorgeSG/philips_airpurifier_http](https://github.com/GeorgeS
 This is a custom Home Assistant component that enables you to control your Philips Air Purifier devices.
 For now, it supports only older models that use the HTTP protocol for communication. CoAP support comming soon. :)
 
+> **Tested on: Philips AC2889/10** (air purifier, no humidifier) — modes `auto`, `allergen`, `manual`, `bacteria`; speeds Silent, 1, 2, 3, Turbo.
+> Other HTTP models (AC2729/10, AC3259/10) are configured in `model_config.py` but haven't been tested with this fork.
+
 ## Installation
 
 ### Install manually
@@ -40,6 +43,24 @@ fan:
 ```
 
 ---
+
+## Entities
+
+Besides the fan (power, mode, speed), each feature is its own entity on the purifier's device, ready to add to a dashboard. Only features the purifier reports are created — e.g. the AC2889/10 gets no humidifier entities.
+
+| Entity                                                | Controls / shows                                                |
+| ----------------------------------------------------- | --------------------------------------------------------------- |
+| `light.<name>_light`                                  | Light on/off and brightness (snaps to 25/50/75/100; off is 0)   |
+| `switch.<name>_child_lock`                            | Child lock                                                      |
+| `switch.<name>_display_light`                         | Display light                                                   |
+| `select.<name>_displayed_index`                       | Index shown on the purifier: `PM2.5` or `IAI`                   |
+| `select.<name>_function`                              | Purification / Purification & Humidification (humidifiers only) |
+| `select.<name>_target_humidity`                       | 40 / 50 / 60 % (humidifiers only)                               |
+| `number.<name>_off_timer`                             | Off timer, 0–12 h                                               |
+| `sensor.<name>_pm2_5`, `sensor.<name>_allergen_index` | Air quality readings                                            |
+| `sensor.<name>_off_timer_remaining`                   | Minutes left on the off timer                                   |
+| `sensor.<name>_{pre,hepa,carbon,wick}_filter`         | Filter life in hours (diagnostic)                               |
+| `sensor.<name>_{temperature,humidity,water_level}`    | Humidifier models only                                          |
 
 ## Services
 

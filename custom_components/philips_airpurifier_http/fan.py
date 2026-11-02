@@ -16,7 +16,6 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .philips_airpurifier_fan import PhilipsAirPurifierFan
 from .const import DOMAIN, DEFAULT_NAME
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
@@ -52,4 +51,4 @@ async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
     """Set up the purifier fan from a config entry."""
-    async_add_entities([PhilipsAirPurifierFan(entry.runtime_data, entry)], True)
+    async_add_entities([entry.runtime_data.fan], True)

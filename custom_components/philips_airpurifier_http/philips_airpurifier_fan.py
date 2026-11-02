@@ -7,6 +7,7 @@ from homeassistant.components.fan import (
 )
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST
+from homeassistant.core import callback
 from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.util.percentage import (
     ordered_list_item_to_percentage,
@@ -118,6 +119,14 @@ class PhilipsAirPurifierFan(FanEntity):
         self._timer = None
         self._timer_remaining = None
 
+        self._listeners = []
+
+    @callback
+    def async_add_listener(self, update_callback):
+        """Call update_callback after every poll; returns a remover."""
+        self._listeners.append(update_callback)
+        return lambda: self._listeners.remove(update_callback)
+
     async def async_added_to_hass(self):
         self.hass.data[DATA_PHILIPS_FANS].append(self)
 
@@ -137,11 +146,13 @@ class PhilipsAirPurifierFan(FanEntity):
             if self._available:
                 _LOGGER.warning("Purifier at %s is unavailable: %s", self._host, exc)
             self._available = False
-            return
+        else:
+            if not self._available:
+                _LOGGER.info("Purifier at %s is available", self._host)
+            self._available = True
 
-        if not self._available:
-            _LOGGER.info("Purifier at %s is available", self._host)
-        self._available = True
+        for update_callback in list(self._listeners):
+            update_callback()
 
     async def _update_filters(self):
         filters = await self.hass.async_add_executor_job(self._client.get_filters)

@@ -11,11 +11,20 @@ import homeassistant.helpers.config_validation as cv
 
 from .client import CannotConnect, connect
 from .const import DATA_PHILIPS_FANS, DOMAIN, SERVICE_ATTR_ENTITY_ID
+from .entity import PhilipsRuntimeData
+from .philips_airpurifier_fan import PhilipsAirPurifierFan
 from .services import AIRPURIFIER_SERVICE_SCHEMA, SERVICE_TO_METHOD
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS = [Platform.FAN]
+PLATFORMS = [
+    Platform.FAN,
+    Platform.LIGHT,
+    Platform.NUMBER,
+    Platform.SELECT,
+    Platform.SENSOR,
+    Platform.SWITCH,
+]
 
 CONFIG_SCHEMA = cv.platform_only_config_schema(DOMAIN)
 
@@ -64,12 +73,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Connect to the purifier; if it's offline, HA retries setup with backoff."""
     host = entry.data[CONF_HOST]
     try:
-        entry.runtime_data = await hass.async_add_executor_job(connect, host)
+        client = await hass.async_add_executor_job(connect, host)
+        keys = await hass.async_add_executor_job(_reported_keys, client)
     except CannotConnect as exc:
         raise ConfigEntryNotReady(f"Can't reach the purifier at {host}") from exc
+    except Exception as exc:
+        raise ConfigEntryNotReady(f"Can't read the purifier at {host}") from exc
+
+    entry.runtime_data = PhilipsRuntimeData(
+        client=client, fan=PhilipsAirPurifierFan(client, entry), keys=keys
+    )
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+def _reported_keys(client):
+    """Status and filter keys, to tell which features this model has."""
+    return set(client.get_status()) | set(client.get_filters())
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
