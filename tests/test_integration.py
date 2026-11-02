@@ -230,6 +230,21 @@ async def test_speed_on_off_purifier_powers_it_on(hass):
         }
 
 
+async def test_turn_on_with_preset_from_off_powers_on_first(hass):
+    client = await _loaded_off_fan(hass)
+    client.set_values.reset_mock()
+    await hass.services.async_call(
+        "fan",
+        "turn_on",
+        {"entity_id": "fan.philips_airpurifier", "preset_mode": "auto"},
+        blocking=True,
+    )
+    assert [c.args[0] for c in client.set_values.call_args_list] == [
+        {"pwr": "1"},
+        {"mode": "P"},
+    ]
+
+
 async def test_preset_and_plain_turn_on_from_off(hass):
     client = await _loaded_off_fan(hass)
     await hass.services.async_call(
@@ -238,7 +253,10 @@ async def test_preset_and_plain_turn_on_from_off(hass):
         {"entity_id": "fan.philips_airpurifier", "preset_mode": "allergen"},
         blocking=True,
     )
-    assert client.set_values.call_args.args[0] == {"mode": "A", "pwr": "1"}
+    assert [c.args[0] for c in client.set_values.call_args_list[-2:]] == [
+        {"pwr": "1"},
+        {"mode": "A"},
+    ]
     await hass.services.async_call(
         "fan", "turn_on", {"entity_id": "fan.philips_airpurifier"}, blocking=True
     )
