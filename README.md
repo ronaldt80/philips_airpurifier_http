@@ -10,7 +10,9 @@ This is a custom Home Assistant component that enables you to control your Phili
 For now, it supports only older models that use the HTTP protocol for communication. CoAP support comming soon. :)
 
 > **Tested on: Philips AC2889/10** (air purifier, no humidifier) — modes `auto`, `allergen`, `manual`, `bacteria`; speeds Silent, 1, 2, 3, Turbo.
-> Other HTTP models (AC2729/10, AC3259/10) are configured in `model_config.py` but haven't been tested with this fork.
+> **Tested on: Philips AC3259/10** (air purifier, no humidifier) — modes `auto`, `allergen`, `manual`, `bacteria`, `sleep` [with patch applied]; speeds Silent, 1, 2, 3, Turbo.
+> Other HTTP models (AC2729/10) are configured in `model_config.py` but haven't been tested with this fork.
+> 
 
 ## Installation
 
